@@ -30,7 +30,7 @@ async def async_setup_entry(
     lights = []
 
     # If mock then start with mocks
-    if config[CONF_IP_ADDRESS] == "mock":   
+    if config[CONF_IP_ADDRESS] == "mock":
         logger.warning("Setting up mock motion sensors")
         mock_motion_sensor1 = ikea_motion_sensor_mock(hub,"mock_motion_sensor1")
         mock_motion_sensor2 = ikea_motion_sensor_mock(hub,"mock_motion_sensor2")

@@ -85,7 +85,7 @@ class ikea_bulb(LightEntity):
     @property
     def device_info(self) -> DeviceInfo:
         return DeviceInfo(
-            identifiers={("dirigera_platform",self._json_data.id)},
+            identifiers={("dirigera_platform", self._json_data.id)},
             name = self._json_data.attributes.custom_name,
             manufacturer = self._json_data.attributes.manufacturer,
             model=self._json_data.attributes.model ,
@@ -114,7 +114,7 @@ class ikea_bulb(LightEntity):
 
     @property
     def hs_color(self):
-        return (self._json_data.attributes.hue, self._json_data.attributes.saturation)
+        return (self._json_data.attributes.color_hue, self._json_data.attributes.color_saturation)
     
     @property
     def is_on(self):
@@ -161,7 +161,7 @@ class ikea_bulb(LightEntity):
                 hs_tuple = kwargs[ATTR_HS_COLOR]
                 self._hue = hs_tuple[0]
                 self._saturation = hs_tuple[1]
-                self._json_data.set_color_temperature(self._hue, self._saturation)
+                self._json_data.set_light_color(self._hue, self._saturation)
 
         except Exception as ex:
             logger.error("error encountered turning on : {}".format(self.name))
