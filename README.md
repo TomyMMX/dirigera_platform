@@ -1,4 +1,4 @@
-## IKEA Dirigera Hub Integration
+## IKEA Dirigera Hub Integration 1.1
 This custom components help integrating HomeAssistant with the new IKEA Dirigera hub. This integration is a scaffolding on the great work done by Nicolas Hilberg  at https://github.com/Leggin/dirigera
 
 Supports
