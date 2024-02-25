@@ -14,6 +14,8 @@ from homeassistant.helpers.entity import DeviceInfo
 from .const import DOMAIN
 
 import logging
+from .message_broker import DirigeraMessageBroker
+
 logger = logging.getLogger("custom_components.dirigera_platform")
 
 # Validation of the user's configuration
@@ -40,14 +42,14 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
             if ip == "mock":
                 logger.info("{ MOCK JSON }")
             else:
-                hub = dirigera.Hub(token, ip) 
+                hub = dirigera.Hub(token, ip)
                 json_resp = hub.get("/devices")
                 logger.info(json_resp)
             logger.info("--------------")
-            
+
         logger.info("=== END Devices JSON ===")
-    
-    hass.services.async_register(DOMAIN, "dump_data", handle_dump_data)     
+
+    hass.services.async_register(DOMAIN, "dump_data", handle_dump_data)
     return True
 
 async def async_setup_entry(hass: core.HomeAssistant, entry: config_entries.ConfigEntry) -> bool:
@@ -60,23 +62,29 @@ async def async_setup_entry(hass: core.HomeAssistant, entry: config_entries.Conf
 
     logger.debug("hass_data")
     logger.debug(hass_data)
-    
+
     ip = hass_data[CONF_IP_ADDRESS]
-    
+    token = hass_data[CONF_TOKEN]
+    # Create a broker that runs in a separate thread
+    # It listens to events from the hub and dispatches them to the event bus
+    DirigeraMessageBroker(ip, token, hass)
+
     # Registers update listener to update config entry when options are updated.
     unsub_options_update_listener = entry.add_update_listener(options_update_listener)
-    
+
     # Store a reference to the unsubscribe function to cleanup if an entry is unloaded.
     hass_data["unsub_options_update_listener"] = unsub_options_update_listener
     hass.data[DOMAIN][entry.entry_id] = hass_data
-    
+
     # Setup the entities
+
     hass.async_create_task(hass.config_entries.async_forward_entry_setup(entry, "light"))
+    hass.async_create_task(hass.config_entries.async_forward_entry_setup(entry, "event"))
     hass.async_create_task(hass.config_entries.async_forward_entry_setup(entry, "switch"))
     hass.async_create_task(hass.config_entries.async_forward_entry_setup(entry, "binary_sensor"))
     hass.async_create_task(hass.config_entries.async_forward_entry_setup(entry, "sensor"))
     hass.async_create_task(hass.config_entries.async_forward_entry_setup(entry, "cover"))
-    
+
     logger.debug("Complete async_setup_entry...")
 
     return True
@@ -108,4 +116,5 @@ async def async_remove_config_entry_device( hass: HomeAssistant, config_entry: c
     logger.info("Got request to remove device")
     logger.info(config_entry)
     logger.info(device_entry)
-    return True 
+
+    return True
